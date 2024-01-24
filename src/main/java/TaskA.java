@@ -1,13 +1,13 @@
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-import java.io.IOException;
+import org.apache.hadoop.fs.FileSystem;
 
 // Report all Facebook users (name, and hobby) whose Nationality is the
 // same as your own Nationality (pick one, e.g., “American” or
@@ -30,7 +30,8 @@ public class TaskA {
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "TaskA");
         job.setJarByClass(TaskA.class);
-        job.setMapperClass(Map.class);
+        job.setMapperClass(TaskA.Map.class);
+        job.setNumReduceTasks(0);
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
