@@ -80,17 +80,13 @@ public class TaskF {
             // read each line of the large data set (AccessLog.csv)
             String[] fields = value.toString().split(",");
             if(friendsMap.containsKey(fields[1]) && friendsMap.get(fields[1]).equals(fields[2])) {
-                System.out.println("Removed: " + fields[1]);
                 friendsMap.remove(fields[1]);
             }
         }
 
         protected void cleanup(Context context) throws IOException, InterruptedException {
-            int j = 1;
             for(java.util.Map.Entry<String, String> set : friendsMap.entrySet()) {
-                System.out.println(j + " " + set.getKey() + " " + pagesMap.get(set.getKey()));
                 context.write(new Text(set.getKey()), new Text(pagesMap.get(set.getKey())));
-                j++;
             }
         }
     }
