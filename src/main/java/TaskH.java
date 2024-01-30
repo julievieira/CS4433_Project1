@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -11,6 +12,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -19,22 +21,24 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FileSystem;
 
-// Identify people p1 that have declared someone as their friend p2 yet
-// who have never accessed their respective friend p2’s Facebook page
-// and return the PersonID and Name of the person p1. (This
-// may indicate that they don’t care enough to find out any news about
-// their friend -- at least not via Facebook).
-public class TaskF {
+// Report all people with a Facebook who are more ‘popular’ than the
+// average person on the Facebook site, namely, those who have more
+// friendship relationships than the average number of friend
+// relationships per person across all people in the site.
+public class TaskH {
 
-    public static class Map extends Mapper<Object, Text, Text, Text>{
+    public static class Map extends Mapper<Object, Text, Text, NullWritable>{
 
-        private java.util.Map<String, String> friendsMap = new HashMap<>();
-        private java.util.Map<String, String> pagesMap = new HashMap<>();
+        private int total = 0;
+        private int num = 0;
+
+        private java.util.Map<String, Integer> friendsMap = new HashMap<>();
         private Text text = new Text();
+
+        // read the record from Friends.csv into the distributed cache
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
-            // read the record from Friends.csv into the distributed cache
             URI[] cacheFiles = context.getCacheFiles();
             Path path = new Path(cacheFiles[0]);
             // open the stream
@@ -47,73 +51,60 @@ public class TaskF {
             String line;
             while (StringUtils.isNotEmpty(line = reader.readLine())) {
                 String[] split = line.split(",");
-                if(!split[1].equals("PersonID")) {
-                    friendsMap.put(split[1], split[2]);
+                if(friendsMap.containsKey(split[2])) {
+                    total++;
+                    friendsMap.put(split[2], friendsMap.get(split[2])+1);
+                } else if(!split[1].equals("PersonID")) {
+                    total++;
+                    friendsMap.put(split[2], 1);
                 }
             }
             // close the stream
             IOUtils.closeStream(reader);
-
-
-            // read the record from Pages.csv into the distributed cache
-            URI[] cacheFiles1 = context.getCacheFiles();
-            Path path1 = new Path(cacheFiles1[1]);
-            // open the stream
-            FileSystem fs1 = FileSystem.get(context.getConfiguration());
-            FSDataInputStream fis1 = fs1.open(path1);
-            // wrap it into a BufferedReader object which is easy to read a record
-            BufferedReader reader1 = new BufferedReader(new InputStreamReader(fis1,
-                    "UTF-8"));
-            // read the record line by line
-            String line1;
-            while (StringUtils.isNotEmpty(line1 = reader1.readLine())) {
-                String[] split = line1.split(",");
-                if(!split[0].equals("PersonID")) {
-                    pagesMap.put(split[0], split[1]);
-                }
-            }
-            // close the stream
-            IOUtils.closeStream(reader1);
         }
 
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            // read each line of the large data set (AccessLog.csv)
+            // read each line of the data set (Friends.csv)
             String[] fields = value.toString().split(",");
-            if(friendsMap.containsKey(fields[1]) && friendsMap.get(fields[1]).equals(fields[2])) {
-                friendsMap.remove(fields[1]);
+            if(!friendsMap.containsKey(fields[0]) && !fields[0].equals("PersonID")) {
+                friendsMap.put(fields[0], 0);
             }
         }
 
         protected void cleanup(Context context) throws IOException, InterruptedException {
-            for(java.util.Map.Entry<String, String> set : friendsMap.entrySet()) {
-                context.write(new Text(set.getKey()), new Text(pagesMap.get(set.getKey())));
+            num = friendsMap.size();
+            double average = total / num;
+            for(java.util.Map.Entry<String, Integer> set : friendsMap.entrySet()) {
+                if(set.getValue() > average) {
+                    context.write(new Text(set.getKey()), NullWritable.get());
+                }
             }
         }
+
     }
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "TaskF");
-        job.setJarByClass(TaskC.class);
+        Job job = Job.getInstance(conf, "TaskH");
+        job.setJarByClass(TaskH.class);
         job.setMapperClass(Map.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        job.setOutputValueClass(NullWritable.class);
 
         // a file in local file system is being used here as an example
         job.addCacheFile(new URI(args[0]));
-        job.addCacheFile(new URI(args[1]));
 
         // Delete the output directory if it exists
-        Path outputPath = new Path(args[3]);
+        Path outputPath = new Path(args[2]);
         FileSystem fs = outputPath.getFileSystem(conf);
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true); // true will delete recursively
         }
 
-        FileInputFormat.addInputPath(job, new Path(args[2]));
+        FileInputFormat.addInputPath(job, new Path(args[1]));
         FileOutputFormat.setOutputPath(job, outputPath);
 
         boolean ret = job.waitForCompletion(true);
@@ -128,25 +119,24 @@ public class TaskF {
         long startTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "TaskF");
-        job.setJarByClass(TaskC.class);
+        Job job = Job.getInstance(conf, "TaskH");
+        job.setJarByClass(TaskH.class);
         job.setMapperClass(Map.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        job.setOutputValueClass(NullWritable.class);
 
         // a file in local file system is being used here as an example
         job.addCacheFile(new URI(args[0]));
-        job.addCacheFile(new URI(args[1]));
 
         // Delete the output directory if it exists
-        Path outputPath = new Path(args[3]);
+        Path outputPath = new Path(args[2]);
         FileSystem fs = outputPath.getFileSystem(conf);
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true); // true will delete recursively
         }
 
-        FileInputFormat.addInputPath(job, new Path(args[2]));
+        FileInputFormat.addInputPath(job, new Path(args[1]));
         FileOutputFormat.setOutputPath(job, outputPath);
 
         boolean ret = job.waitForCompletion(true);
