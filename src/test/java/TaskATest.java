@@ -15,8 +15,9 @@ public class TaskATest {
             Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
         */
 
-        input[0] = "file:///HostPath/project1_data/pages.csv";
-        input[1] = "file:///Users/Kseniia/IdeaProjects/Project1/output";
+        //relative path so make sure that the code is running in the correct directory
+        input[0] = "/home/taya/CS4433_Project1/src/main/data/pages.csv";
+        input[1] = "/home/taya/CS4433_Project1/src/output";
 
         TaskA taskA = new TaskA();
         boolean result = taskA.debug(input);

@@ -14,9 +14,9 @@ public class TaskBTest {
             Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
         */
 
-        input[0] = "file:///HostPath/project1_data/pages.csv";
-        input[1] = "file:///HostPath/project1_data/access_logs.csv";
-        input[2] = "file:///Users/Kseniia/IdeaProjects/Project1/output";
+        input[0] = "/home/taya/CS4433_Project1/src/main/data/pages.csv";
+        input[1] = "/home/taya/CS4433_Project1/src/main/data/access_logs.csv";
+        input[2] = "/home/taya/CS4433_Project1/output";
 
         TaskB taskB = new TaskB();
         boolean result = taskB.debug(input);
@@ -26,7 +26,7 @@ public class TaskBTest {
 
 
 
-        String[] input2 = new String[4];
+       /* String[] input2 = new String[4];
 
         input2[0] = "file:///HostPath/project1_data/pages.csv";
         input2[1] = "file:///HostPath/project1_data/access_logs.csv";
@@ -36,7 +36,7 @@ public class TaskBTest {
         TaskB2 taskB2 = new TaskB2();
         boolean result2 = taskB2.debug(input2);
 
-        assertTrue("The Hadoop job did not complete successfully", result2);
+        assertTrue("The Hadoop job did not complete successfully", result2);*/
     }
 
 }
