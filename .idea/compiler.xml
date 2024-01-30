@@ -9,8 +9,5 @@
         <module name="CS4433_Project1" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="CS4433_Project1" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

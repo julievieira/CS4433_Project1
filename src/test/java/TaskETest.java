@@ -2,7 +2,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class TaskATest {
+public class TaskETest {
 
     @Test
     public void debug() throws Exception {
@@ -15,11 +15,11 @@ public class TaskATest {
             Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
         */
 
-        input[0] = "hdfs://localhost:9000/project1/pages.csv";
-        input[1] = "hdfs://localhost:9000/project1/output_TaskA";
+        input[0] = "hdfs://localhost:9000/project1/access_logs.csv";
+        input[1] = "hdfs://localhost:9000/project1/output_TaskE";
 
-        TaskA taskA = new TaskA();
-        boolean result = taskA.debug(input);
+        TaskE taskE = new TaskE();
+        boolean result = taskE.debug(input);
 
         assertTrue("The Hadoop job did not complete successfully", result);
     }

@@ -2,7 +2,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class TaskATest {
+public class TaskCTest {
 
     @Test
     public void debug() throws Exception {
@@ -16,10 +16,10 @@ public class TaskATest {
         */
 
         input[0] = "hdfs://localhost:9000/project1/pages.csv";
-        input[1] = "hdfs://localhost:9000/project1/output_TaskA";
+        input[1] = "hdfs://localhost:9000/project1/output_TaskC";
 
-        TaskA taskA = new TaskA();
-        boolean result = taskA.debug(input);
+        TaskC taskC = new TaskC();
+        boolean result = taskC.debug(input);
 
         assertTrue("The Hadoop job did not complete successfully", result);
     }

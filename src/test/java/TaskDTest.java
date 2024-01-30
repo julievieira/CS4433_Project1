@@ -2,11 +2,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class TaskATest {
+public class TaskDTest {
 
     @Test
     public void debug() throws Exception {
-        String[] input = new String[2];
+        String[] input = new String[3];
 
         /*
         1. put the data.txt into a folder in your PC.
@@ -16,10 +16,11 @@ public class TaskATest {
         */
 
         input[0] = "hdfs://localhost:9000/project1/pages.csv";
-        input[1] = "hdfs://localhost:9000/project1/output_TaskA";
+        input[1] = "hdfs://localhost:9000/project1/friends.csv";
+        input[2] = "hdfs://localhost:9000/project1/output_TaskD";
 
-        TaskA taskA = new TaskA();
-        boolean result = taskA.debug(input);
+        TaskD taskD = new TaskD();
+        boolean result = taskD.debug(input);
 
         assertTrue("The Hadoop job did not complete successfully", result);
     }
