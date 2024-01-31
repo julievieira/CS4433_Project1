@@ -15,9 +15,13 @@ public class TaskETest {
             Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
         */
 
-        input[0] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/pages.csv";
-        input[1] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/access_logs.csv";
-        input[2] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/output";
+//        input[0] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/pages.csv";
+//        input[1] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/access_logs.csv";
+//        input[2] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/output";
+
+        input[0] = "hdfs://localhost:9000/project1/pages.csv";
+        input[1] = "hdfs://localhost:9000/project1/access_logs.csv";
+        input[2] = "hdfs://localhost:9000/project1/TaskE";
 
         TaskE taskE = new TaskE();
         boolean result = taskE.debug(input);

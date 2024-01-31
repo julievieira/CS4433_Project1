@@ -1,20 +1,11 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FileSystem;
@@ -26,35 +17,16 @@ public class TaskC {
     public static class Map extends Mapper<Object, Text, Text, IntWritable>{
 
         private java.util.Map<String, Integer> nationalityMap = new HashMap<>();
-        private Text text = new Text();
-
-        // read the record from Nationalities.csv into the distributed cache
-
-        @Override
-        protected void setup(Context context) throws IOException, InterruptedException {
-            URI[] cacheFiles = context.getCacheFiles();
-            Path path = new Path(cacheFiles[0]);
-            // open the stream
-            FileSystem fs = FileSystem.get(context.getConfiguration());
-            FSDataInputStream fis = fs.open(path);
-            // wrap it into a BufferedReader object which is easy to read a record
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis,
-                    "UTF-8"));
-            // read the record line by line
-            String line;
-            while (StringUtils.isNotEmpty(line = reader.readLine())) {
-                String[] split = line.split(",");
-                nationalityMap.put(split[0], 0);
-            }
-            // close the stream
-            IOUtils.closeStream(reader);
-        }
 
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // read each line of the large data set (Pages.csv)
             String[] fields = value.toString().split(",");
             if(!fields[2].equals("Nationality")) {
-                nationalityMap.put(fields[2], nationalityMap.get(fields[2]) + 1);
+                if(nationalityMap.containsKey(fields[2])) {
+                    nationalityMap.put(fields[2], nationalityMap.get(fields[2]) + 1);
+                } else {
+                    nationalityMap.put(fields[2],  1);
+                }
             }
         }
 
@@ -76,17 +48,14 @@ public class TaskC {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
-
         // Delete the output directory if it exists
-        Path outputPath = new Path(args[2]);
+        Path outputPath = new Path(args[1]);
         FileSystem fs = outputPath.getFileSystem(conf);
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true); // true will delete recursively
         }
 
-        FileInputFormat.addInputPath(job, new Path(args[1]));
+        FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, outputPath);
 
         boolean ret = job.waitForCompletion(true);
@@ -108,17 +77,14 @@ public class TaskC {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
-
         // Delete the output directory if it exists
-        Path outputPath = new Path(args[2]);
+        Path outputPath = new Path(args[1]);
         FileSystem fs = outputPath.getFileSystem(conf);
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true); // true will delete recursively
         }
 
-        FileInputFormat.addInputPath(job, new Path(args[1]));
+        FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, outputPath);
 
         boolean ret = job.waitForCompletion(true);

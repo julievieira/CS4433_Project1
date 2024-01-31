@@ -1,4 +1,5 @@
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -92,8 +93,10 @@ public class TaskB2 {
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
-            URI[] cacheFiles = context.getCacheFiles();
-            Path path = new Path(cacheFiles[0]);
+//            URI[] cacheFiles = context.getCacheFiles();
+//            Path path = new Path(cacheFiles[0]);
+            Path[] files = DistributedCache.getLocalCacheFiles(context.getConfiguration());
+            Path path = files[0];
             // open the stream
             FileSystem fs = FileSystem.get(context.getConfiguration());
             FSDataInputStream fis = fs.open(path);
@@ -160,7 +163,11 @@ public class TaskB2 {
         job2.setOutputValueClass(NullWritable.class);
 
         // a file in local file system is being used here as an example
-        job2.addCacheFile(new URI(args[0]));
+//        job2.addCacheFile(new URI(args[0]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job2.getConfiguration());
+        DistributedCache.setLocalFiles(job2.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath2 = new Path(args[2]);
@@ -215,7 +222,11 @@ public class TaskB2 {
         job2.setOutputValueClass(NullWritable.class);
 
         // a file in local file system is being used here as an example
-        job2.addCacheFile(new URI(args[0]));
+//        job2.addCacheFile(new URI(args[0]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job2.getConfiguration());
+        DistributedCache.setLocalFiles(job2.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath2 = new Path(args[2]);
