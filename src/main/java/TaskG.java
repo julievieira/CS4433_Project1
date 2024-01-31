@@ -86,7 +86,6 @@ public class TaskG {
 
             String[] fields = value.toString().split(",");
             if(!fields[0].equals("AccessID") && within14Days(fields[4], startTime)) {
-                System.out.println("Removed " + fields[1] + " time is " + fields[4]);
                 pagesMap.remove(fields[1]);
             }
         }
