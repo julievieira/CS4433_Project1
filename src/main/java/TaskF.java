@@ -3,18 +3,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,8 +32,10 @@ public class TaskF {
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             // read the record from Friends.csv into the distributed cache
-            URI[] cacheFiles = context.getCacheFiles();
-            Path path = new Path(cacheFiles[0]);
+//            URI[] cacheFiles = context.getCacheFiles();
+//            Path path = new Path(cacheFiles[0]);
+            Path[] files = DistributedCache.getLocalCacheFiles(context.getConfiguration());
+            Path path = files[0];
             // open the stream
             FileSystem fs = FileSystem.get(context.getConfiguration());
             FSDataInputStream fis = fs.open(path);
@@ -56,8 +55,9 @@ public class TaskF {
 
 
             // read the record from Pages.csv into the distributed cache
-            URI[] cacheFiles1 = context.getCacheFiles();
-            Path path1 = new Path(cacheFiles1[1]);
+//            URI[] cacheFiles1 = context.getCacheFiles();
+//            Path path1 = new Path(cacheFiles1[1]);
+            Path path1 = files[1];
             // open the stream
             FileSystem fs1 = FileSystem.get(context.getConfiguration());
             FSDataInputStream fis1 = fs1.open(path1);
@@ -103,8 +103,13 @@ public class TaskF {
         job.setOutputValueClass(Text.class);
 
         // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
-        job.addCacheFile(new URI(args[1]));
+//        job.addCacheFile(new URI(args[0]));
+//        job.addCacheFile(new URI(args[1]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job.getConfiguration());
+        DistributedCache.addCacheFile(new Path(args[1]).toUri(), job.getConfiguration());
+        DistributedCache.setLocalFiles(job.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath = new Path(args[3]);
@@ -136,8 +141,13 @@ public class TaskF {
         job.setOutputValueClass(Text.class);
 
         // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
-        job.addCacheFile(new URI(args[1]));
+//        job.addCacheFile(new URI(args[0]));
+//        job.addCacheFile(new URI(args[1]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job.getConfiguration());
+        DistributedCache.addCacheFile(new Path(args[1]).toUri(), job.getConfiguration());
+        DistributedCache.setLocalFiles(job.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath = new Path(args[3]);

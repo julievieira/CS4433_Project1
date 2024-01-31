@@ -11,6 +11,7 @@ import java.util.PriorityQueue;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
@@ -52,8 +53,10 @@ public class TaskG {
         // read the record from Pages.csv into the distributed cache
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
-            URI[] cacheFiles = context.getCacheFiles();
-            Path path = new Path(cacheFiles[0]);
+//            URI[] cacheFiles = context.getCacheFiles();
+//            Path path = new Path(cacheFiles[0]);
+            Path[] files = DistributedCache.getLocalCacheFiles(context.getConfiguration());
+            Path path = files[0];
             // open the stream
             FileSystem fs = FileSystem.get(context.getConfiguration());
             FSDataInputStream fis = fs.open(path);
@@ -82,8 +85,6 @@ public class TaskG {
             // Format the current time
             String startTime = currentTime.format(formatter);
 
-            startTime = "2023-09-20 13:44:58";
-
             String[] fields = value.toString().split(",");
             if(!fields[0].equals("AccessID") && within14Days(fields[4], startTime)) {
                 pagesMap.remove(fields[1]);
@@ -110,7 +111,11 @@ public class TaskG {
         job.setOutputValueClass(Text.class);
 
         // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
+//        job.addCacheFile(new URI(args[0]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job.getConfiguration());
+        DistributedCache.setLocalFiles(job.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath = new Path(args[2]);
@@ -142,7 +147,11 @@ public class TaskG {
         job.setOutputValueClass(Text.class);
 
         // a file in local file system is being used here as an example
-        job.addCacheFile(new URI(args[0]));
+//        job.addCacheFile(new URI(args[0]));
+
+        // Configure the DistributedCache
+        DistributedCache.addCacheFile(new Path(args[0]).toUri(), job.getConfiguration());
+        DistributedCache.setLocalFiles(job.getConfiguration(), args[0]);
 
         // Delete the output directory if it exists
         Path outputPath = new Path(args[2]);

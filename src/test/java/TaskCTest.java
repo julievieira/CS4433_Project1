@@ -15,9 +15,11 @@ public class TaskCTest {
             Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
         */
 
-        input[0] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/nationalities.csv";
-        input[1] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/pages.csv";
-        input[2] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/output";
+//        input[0] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/src/main/data/pages.csv";
+//        input[1] = "file:///C:/Users/Kseniia/Documents/GitHub/CS4433_Project1/output";
+
+        input[0] = "hdfs://localhost:9000/project1/pages.csv";
+        input[1] = "hdfs://localhost:9000/project1/TaskC";
 
         TaskC taskC = new TaskC();
         boolean result = taskC.debug(input);
