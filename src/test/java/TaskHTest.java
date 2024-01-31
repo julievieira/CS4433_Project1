@@ -1,2 +1,43 @@
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+
 public class TaskHTest {
+
+    // FileInputFormat.addInputPath(job, new Path("/home/taya/CS4433_Project1/src/main/data/friends.csv"));
+    //        FileOutputFormat.setOutputPath(job, new Path("/home/taya/CS4433_Project1/src/output"));
+    @Test
+    public void debug() throws Exception {
+        String[] input = new String[3];
+
+        /*
+        1. put the data.txt into a folder in your PC.
+        2. add the path for the following two files.
+            Windows: update the path like "file:///C:/Users/.../projectDirectory/data.txt"
+            Mac or Linux: update the path like "file:///Users/.../projectDirectory/data.txt"
+        */
+
+        input[0] = "/home/taya/CS4433_Project1/src/main/data/friends.csv";
+        input[1] = "/home/taya/CS4433_Project1/output";
+
+        TaskH taskH = new TaskH();
+        boolean result = taskH.debug(input);
+
+        assertTrue("The Hadoop job did not complete successfully", result);
+
+
+
+
+       /* String[] input2 = new String[4];
+
+        input2[0] = "file:///HostPath/project1_data/pages.csv";
+        input2[1] = "file:///HostPath/project1_data/access_logs.csv";
+        input2[2] = "file:///Users/Kseniia/IdeaProjects/Project1/output";
+        input2[3] = "file:///Users/Kseniia/IdeaProjects/Project1/exchange";
+
+        TaskB2 taskB2 = new TaskB2();
+        boolean result2 = taskB2.debug(input2);
+
+        assertTrue("The Hadoop job did not complete successfully", result2);*/
+    }
 }

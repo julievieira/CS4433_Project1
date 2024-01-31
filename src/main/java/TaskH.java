@@ -1,8 +1,10 @@
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -32,7 +34,7 @@ public class TaskH {
         }
     }
 
-    public static class AverageFriendCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+    public static class avgReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
         private IntWritable result = new IntWritable();
         private Map<String, Integer> friendCountMap = new HashMap<>();
 
@@ -70,20 +72,71 @@ public class TaskH {
         }
     }
 
+
     public static void main(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "TaskH");
 
         job.setJarByClass(TaskH.class);
         job.setMapperClass(FriendsMapper.class);
-        job.setReducerClass(AverageFriendCountReducer.class);
+        job.setReducerClass(avgReducer.class);
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        FileInputFormat.addInputPath(job, new Path("/home/taya/CS4433_Project1/src/main/data/friends.csv"));
-        FileOutputFormat.setOutputPath(job, new Path("/home/taya/CS4433_Project1/src/output"));
+
+        // Delete the output directory if it exists
+        Path outputPath = new Path(args[1]);
+        FileSystem fs = outputPath.getFileSystem(conf);
+        if (fs.exists(outputPath)) {
+            fs.delete(outputPath, true); // true will delete recursively
+        }
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, outputPath);
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
+        boolean ret = job.waitForCompletion(true);
+
+        long endTime = System.currentTimeMillis();
+        System.out.println((endTime - startTime) / 1000.0 + " seconds");
+
+        System.exit(ret ? 0 : 1);
     }
+
+    public boolean debug(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
+
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "TaskH");
+
+        job.setJarByClass(TaskH.class);
+        job.setMapperClass(FriendsMapper.class);
+        job.setReducerClass(avgReducer.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+
+        // Delete the output directory if it exists
+        Path outputPath = new Path(args[1]);
+        FileSystem fs = outputPath.getFileSystem(conf);
+        if (fs.exists(outputPath)) {
+            fs.delete(outputPath, true); // true will delete recursively
+        }
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, outputPath);
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+        boolean ret = job.waitForCompletion(true);
+
+        long endTime = System.currentTimeMillis();
+        System.out.println((endTime - startTime) / 1000.0 + " seconds");
+
+        return ret;
+    }
+
 }
