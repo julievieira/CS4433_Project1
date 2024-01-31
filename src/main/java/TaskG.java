@@ -63,16 +63,13 @@ days).
         Job job = Job.getInstance(conf, "TaskG");
         job.setJarByClass(TaskG.class);
         job.setMapperClass(TaskG.Map.class);
-
         job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(Text.class);
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(Text.class);
-
         // Here we assume that the first input path is for friends.csv and the second for access_log.csv
         FileInputFormat.addInputPath(job, new Path("/home/taya/CS4433_Project1/src/main/data/access_logs.csv"));
         FileOutputFormat.setOutputPath(job, new Path("/home/taya/CS4433_Project1/src/output"));
-
         job.waitForCompletion(true);*/
 
 
